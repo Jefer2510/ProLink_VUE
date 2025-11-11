@@ -1,8 +1,16 @@
 <script setup>
+import DashboardButton from './components/DashboardButton.vue';
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
 </script>
 
 <template>
-  <router-view />
+  <div>
+    <router-view />
+    <!-- Mostrar botón solo si NO estás en login/register -->
+    <DashboardButton v-if="route.path !== '/login' && route.path !== '/register'" />
+  </div>
 </template>
 
 <style>

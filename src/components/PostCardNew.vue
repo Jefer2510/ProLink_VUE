@@ -70,12 +70,64 @@
         <span class="text-sm font-medium">Comentar</span>
       </button>
 
-      <button class="flex items-center gap-2 text-gray-400 hover:text-primary-400 transition-colors">
+      <button 
+        @click="showShareModal = true"
+        class="flex items-center gap-2 text-gray-400 hover:text-primary-400 transition-colors"
+      >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
         </svg>
         <span class="text-sm font-medium">Compartir</span>
       </button>
+    </div>
+
+    <!-- Share Modal -->
+    <div
+      v-if="showShareModal"
+      class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+      @click.self="showShareModal = false"
+    >
+      <div class="bg-dark-800 rounded-lg p-6 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold text-white">Compartir publicación</h3>
+          <button @click="showShareModal = false" class="text-gray-400 hover:text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        
+        <p class="text-gray-300 mb-4">Selecciona una conexión para enviar este post:</p>
+        
+        <div v-if="loadingConnections" class="text-center py-8">
+          <div class="spinner mx-auto mb-2"></div>
+          <p class="text-gray-400">Cargando conexiones...</p>
+        </div>
+        
+        <div v-else-if="connections.length === 0" class="text-center py-8 text-gray-400">
+          No tienes conexiones aún
+        </div>
+        
+        <div v-else class="space-y-2">
+          <div 
+            v-for="connection in connections" 
+            :key="connection.contact_id"
+            @click="sharePost(connection)"
+            class="flex items-center gap-3 p-3 bg-dark-700 hover:bg-primary-900/20 rounded-lg cursor-pointer transition-colors"
+          >
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+              {{ connection.nombre?.charAt(0) }}{{ connection.apellido?.charAt(0) }}
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-white font-semibold text-sm">{{ connection.nombre }} {{ connection.apellido }}</p>
+              <p class="text-xs text-gray-400 truncate">{{ connection.headline || 'Profesional' }}</p>
+            </div>
+            <svg class="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Comments Section -->
@@ -163,9 +215,11 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useAuth } from '../composables/useAuth';
 import { useInteractions } from '../composables/useInteractions';
+import { useConnections } from '../composables/useConnections';
+import { useMessages } from '../composables/useMessages';
 
 const props = defineProps({
   post: {
@@ -178,11 +232,16 @@ const emit = defineEmits(['deleted', 'updated']);
 
 const { user } = useAuth();
 const { likePost, unlikePost, createComment, getPostComments, deleteComment } = useInteractions();
+const { getConnections } = useConnections();
+const { sendMessage } = useMessages();
 
 const showDeleteModal = ref(false);
 const showComments = ref(false);
+const showShareModal = ref(false);
 const newComment = ref('');
 const comments = ref([]);
+const connections = ref([]);
+const loadingConnections = ref(false);
 const isLiked = ref(false);
 const likesCount = ref(props.post.likes_count || 0);
 const commentsCount = ref(props.post.comments_count || 0);
@@ -250,6 +309,36 @@ const loadComments = async () => {
   }
 };
 
+const loadConnections = async () => {
+  loadingConnections.value = true;
+  try {
+    const result = await getConnections();
+    // Filtrar solo conexiones aceptadas
+    connections.value = result.filter(c => c.status === 'ACCEPTED');
+  } catch (error) {
+    console.error('Error al cargar conexiones:', error);
+  } finally {
+    loadingConnections.value = false;
+  }
+};
+
+const sharePost = async (connection) => {
+  try {
+    const postUrl = `${window.location.origin}/feed#post-${props.post.id}`;
+    const message = `📢 ${props.post.nombre} compartió:\n\n${props.post.content.substring(0, 100)}${props.post.content.length > 100 ? '...' : ''}\n\nVer post completo: ${postUrl}`;
+    
+    await sendMessage(connection.contact_id, message);
+    
+    showShareModal.value = false;
+    
+    // Mostrar notificación de éxito
+    alert(`✅ Publicación compartida con ${connection.nombre} ${connection.apellido}`);
+  } catch (error) {
+    console.error('Error al compartir publicación:', error);
+    alert('❌ Error al compartir la publicación');
+  }
+};
+
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   const now = new Date();
@@ -270,6 +359,13 @@ const formatDate = (dateString) => {
     month: 'short' 
   });
 };
+
+// Watch para cargar conexiones cuando se abre el modal
+watch(showShareModal, (newValue) => {
+  if (newValue) {
+    loadConnections();
+  }
+});
 
 // Watch showComments to load comments when toggled
 watch(showComments, async (newVal) => {

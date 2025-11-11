@@ -67,21 +67,7 @@
       </div>
 
       <!-- Profile Viewers -->
-      <div class="card viewers-card">
-        <h3>👥 Quién Vio Tu Perfil</h3>
-        <div v-if="viewers.length > 0" class="viewers-list">
-          <div v-for="viewer in viewers" :key="viewer.viewer_id" class="viewer-item">
-            <div class="viewer-avatar">{{ getInitials(viewer.nombre, viewer.apellido) }}</div>
-            <div class="viewer-info">
-              <div class="viewer-name">{{ viewer.nombre }} {{ viewer.apellido }}</div>
-              <div class="viewer-time">{{ formatTime(viewer.viewed_at) }}</div>
-            </div>
-          </div>
-        </div>
-        <div v-else class="empty-state">
-          <p>Nadie ha visto tu perfil aún</p>
-        </div>
-      </div>
+      <ProfileViewers :limit="5" @viewAll="viewAllViewers" />
 
       <!-- Post Analytics -->
       <div class="card posts-card">
@@ -155,6 +141,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useAnalytics } from '../composables/useAnalytics';
+import ProfileViewers from '../components/ProfileViewers.vue';
 
 const { 
   stats, 
@@ -220,11 +207,15 @@ const getGrowthHeight = (value) => {
   return maxValue > 0 ? (value / maxValue) * 100 + 20 : 20;
 };
 
+const viewAllViewers = () => {
+  // Aquí puedes implementar un modal o navegar a una página con todos los viewers
+  alert('Funcionalidad de ver todos los visitantes - próximamente');
+};
+
 onMounted(async () => {
   try {
     await Promise.all([
       getStats(),
-      getViewers(10),
       getPostAnalytics(30),
       getBestPostingTime(),
       getNetworkGrowth(6)

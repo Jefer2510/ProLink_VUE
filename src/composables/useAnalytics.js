@@ -41,7 +41,7 @@ export function useAnalytics() {
     }
   };
 
-  const getViewers = async (limit = 10) => {
+  const getProfileViewers = async (limit = 10) => {
     loading.value = true;
     error.value = null;
     try {
@@ -53,7 +53,8 @@ export function useAnalytics() {
       return response.data.viewers;
     } catch (err) {
       error.value = err.response?.data?.error || 'Error al cargar visitantes';
-      throw err;
+      console.error('Error al cargar visitantes:', err);
+      return [];
     } finally {
       loading.value = false;
     }
@@ -123,7 +124,7 @@ export function useAnalytics() {
     error,
     recordProfileView,
     getStats,
-    getViewers,
+    getProfileViewers,
     getPostAnalytics,
     getBestPostingTime,
     getNetworkGrowth

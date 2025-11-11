@@ -10,7 +10,11 @@ import LeaderboardView from '../views/LeaderboardView.vue';
 const routes = [
   {
     path: '/',
-    redirect: '/feed'
+    name: 'Home',
+    redirect: () => {
+      const token = localStorage.getItem('token');
+      return token ? '/feed' : '/login';
+    }
   },
   {
     path: '/login',
@@ -65,15 +69,24 @@ const router = createRouter({
 
 // Navigation guard
 router.beforeEach((to, from, next) => {
-  const { isAuthenticated } = useAuth();
+  const token = localStorage.getItem('token');
+  const user = localStorage.getItem('user');
+  const isAuthenticated = !!(token && user);
 
   // Rutas que requieren autenticación
-  if (to.meta.requiresAuth && !isAuthenticated.value) {
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    // Limpiar datos inválidos
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     next('/login');
   }
   // Rutas solo para usuarios no autenticados (login, register)
-  else if (to.meta.requiresGuest && isAuthenticated.value) {
+  else if (to.meta.requiresGuest && isAuthenticated) {
     next('/feed');
+  }
+  // Redirigir raíz según autenticación
+  else if (to.path === '/' && !isAuthenticated) {
+    next('/login');
   }
   else {
     next();

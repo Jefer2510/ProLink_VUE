@@ -2,17 +2,105 @@
 @tailwind components;
 @tailwind utilities;
 
+
 html, body {
   margin: 0;
   padding: 0;
-  background: #0a0612;
   min-height: 100vh;
   overflow-x: hidden;
+  font-family: 'Inter', 'Montserrat', 'ui-sans-serif', 'system-ui', 'sans-serif';
+  background: linear-gradient(135deg, #0a0f1a 0%, #001d6c 100%) fixed;
+  color: #e2e8f0;
+  letter-spacing: 0.01em;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #app {
   min-height: 100vh;
-  background: #0a0612;
+  background: transparent;
+}
+
+/* Card base */
+.card {
+  background: rgba(16,30,54,0.85);
+  border-radius: 1.25rem;
+  box-shadow: 0 2px 8px 0 rgba(16,30,54,0.10);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border: 1px solid rgba(100,116,139,0.10);
+  transition: box-shadow 0.2s;
+}
+.card:hover {
+  box-shadow: 0 6px 24px 0 rgba(16,30,54,0.18);
+}
+
+/* Botón base */
+.btn {
+  @apply px-5 py-2 rounded-xl font-semibold shadow-soft transition-colors duration-200;
+  background: linear-gradient(90deg, #0f62fe 0%, #8b5cf6 100%);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+.btn:hover {
+  background: linear-gradient(90deg, #8b5cf6 0%, #0f62fe 100%);
+  color: #fff;
+  box-shadow: 0 4px 16px #0f62fe44;
+}
+.btn:active {
+  background: #0043ce;
+}
+
+/* Input base */
+.input {
+  @apply px-4 py-2 rounded-xl border border-dark-400 bg-dark-700 text-white focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all duration-200;
+  font-size: 1rem;
+  box-shadow: 0 1px 4px 0 rgba(16,30,54,0.08);
+}
+.input:focus {
+  border-color: #0f62fe;
+  background: #1e293b;
+}
+
+/* Heading */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Montserrat', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif';
+  font-weight: 700;
+  color: #f1f5f9;
+  letter-spacing: 0.01em;
+}
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.5rem; }
+h4 { font-size: 1.25rem; }
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  background: #0a0f1a;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #0f62fe;
+}
+
+/* Animaciones sutiles */
+.fade-in {
+  animation: fadeIn 0.7s cubic-bezier(.39,.575,.565,1) both;
+}
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateY(16px); }
+  100% { opacity: 1; transform: none; }
+}
+
+/* Sombra para modales y menús */
+.modal-shadow {
+  box-shadow: 0 8px 32px 0 rgba(16,30,54,0.25);
 }
 
 /* Responsive Utilities */

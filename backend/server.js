@@ -129,8 +129,8 @@ app.use('/api/analytics', analyticsRouter);
 app.use('/api/gamification', gamificationRouter);
 
 // Start server
-server.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server is running on port ${PORT} and listening on 0.0.0.0`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`Socket.IO enabled for real-time chat ✅`);
 });

@@ -38,7 +38,7 @@ const getProfileStats = async (userId) => {
     const [connections] = await db.query(
       `SELECT COUNT(*) as total_connections
        FROM connections
-       WHERE (sender_id = ? OR receiver_id = ?) AND status = 'ACCEPTED'`,
+       WHERE (user_id = ? OR connected_user_id = ?) AND status = 'ACCEPTED'`,
       [userId, userId]
     );
 
@@ -96,8 +96,8 @@ const getProfileViewers = async (userId, limit = 10) => {
     const [viewers] = await db.query(
       `SELECT 
          u.id,
-         u.first_name as nombre,
-         u.last_name as apellido,
+         u.nombre as nombre,
+         u.apellido as apellido,
          u.headline,
          u.profile_picture_url,
          pv.viewed_at,
@@ -179,7 +179,7 @@ const getNetworkGrowth = async (userId, months = 6) => {
          DATE_FORMAT(created_at, '%Y-%m') as month,
          COUNT(*) as new_connections
        FROM connections
-       WHERE (sender_id = ? OR receiver_id = ?) 
+       WHERE (user_id = ? OR connected_user_id = ?) 
          AND status = 'ACCEPTED'
          AND created_at >= DATE_SUB(NOW(), INTERVAL ? MONTH)
        GROUP BY DATE_FORMAT(created_at, '%Y-%m')

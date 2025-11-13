@@ -34,7 +34,6 @@ CREATE TABLE IF NOT EXISTS posts (
   INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Messages table (Mensajería)
 CREATE TABLE IF NOT EXISTS messages (
   id INT AUTO_INCREMENT PRIMARY KEY,
   sender_id INT NOT NULL,
@@ -47,6 +46,22 @@ CREATE TABLE IF NOT EXISTS messages (
   INDEX idx_sender (sender_id),
   INDEX idx_receiver (receiver_id),
   INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Connections table (Conexiones entre usuarios)
+CREATE TABLE IF NOT EXISTS connections (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  connected_user_id INT NOT NULL,
+  status ENUM('pending', 'accepted', 'rejected') DEFAULT 'pending',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (connected_user_id) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE KEY unique_connection (user_id, connected_user_id),
+  INDEX idx_user_id (user_id),
+  INDEX idx_connected_user_id (connected_user_id),
+  INDEX idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- User Skills table (Skills)

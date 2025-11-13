@@ -49,7 +49,7 @@ router.post('/register', async (req, res) => {
 
     // Insertar usuario en la base de datos
     const [result] = await db.query(
-      'INSERT INTO users (email, password_hash, first_name, last_name, headline, created_at) VALUES (?, ?, ?, ?, ?, NOW())',
+      'INSERT INTO users (email, password, nombre, apellido, headline, created_at) VALUES (?, ?, ?, ?, ?, NOW())',
       [email, hashedPassword, nombre, apellido, headline || null]
     );
 
@@ -76,7 +76,7 @@ router.post('/login', async (req, res) => {
 
     // Buscar usuario por email
     const [users] = await db.query(
-      'SELECT id, email, password_hash, first_name, last_name, headline FROM users WHERE email = ?',
+      'SELECT id, email, password, nombre, apellido, headline FROM users WHERE email = ?',
       [email]
     );
 
@@ -86,8 +86,8 @@ router.post('/login', async (req, res) => {
 
     const user = users[0];
 
-    // Verificar contraseña
-    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+  // Verificar contraseña
+  const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Credenciales inválidas' });
@@ -110,8 +110,8 @@ router.post('/login', async (req, res) => {
       user: {
         id: user.id,
         email: user.email,
-        nombre: user.first_name,
-        apellido: user.last_name,
+        nombre: user.nombre,
+        apellido: user.apellido,
         headline: user.headline
       }
     });
@@ -126,7 +126,7 @@ router.post('/login', async (req, res) => {
 router.get('/profile', authenticateToken, async (req, res) => {
   try {
     const [users] = await db.query(
-      'SELECT id, email, first_name as nombre, last_name as apellido, headline, created_at FROM users WHERE id = ?',
+  'SELECT id, email, nombre, apellido, headline, created_at FROM users WHERE id = ?',
       [req.user.userId]
     );
 

@@ -170,8 +170,8 @@ const getLeaderboard = async (limit = 10, period = 'all') => {
     const [leaderboard] = await db.query(
       `SELECT 
          u.id,
-         u.first_name as nombre,
-         u.last_name as apellido,
+         u.nombre as nombre,
+         u.apellido as apellido,
          u.headline,
          u.profile_picture_url,
          u.level,
@@ -216,7 +216,7 @@ const checkAchievements = async (userId) => {
 
     // Verificar conexiones
     const [connections] = await db.query(
-      'SELECT COUNT(*) as count FROM connections WHERE (sender_id = ? OR receiver_id = ?) AND status = "ACCEPTED"',
+      'SELECT COUNT(*) as count FROM connections WHERE (user_id = ? OR connected_user_id = ?) AND status = "ACCEPTED"',
       [userId, userId]
     );
     if (connections[0].count === 1) {

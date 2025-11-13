@@ -39,8 +39,8 @@ const getFeedPosts = async (limit = 20) => {
         p.image_url,
         p.created_at,
         u.id as user_id,
-        u.first_name as nombre,
-        u.last_name as apellido,
+        u.nombre as nombre,
+        u.apellido as apellido,
         u.email,
         u.headline,
         (SELECT COUNT(*) FROM likes WHERE post_id = p.id) as likes_count,
@@ -73,8 +73,8 @@ const getPostById = async (postId) => {
         p.image_url,
         p.created_at,
         u.id as user_id,
-        u.first_name as nombre,
-        u.last_name as apellido,
+        u.nombre as nombre,
+        u.apellido as apellido,
         u.email,
         u.headline
       FROM posts p
@@ -105,8 +105,8 @@ const getPostsByUserId = async (userId, limit = 20) => {
         p.image_url,
         p.created_at,
         u.id as user_id,
-        u.first_name as nombre,
-        u.last_name as apellido,
+        u.nombre as nombre,
+        u.apellido as apellido,
         u.email,
         u.headline
       FROM posts p

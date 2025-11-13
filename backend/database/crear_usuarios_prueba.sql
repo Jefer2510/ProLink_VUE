@@ -1,4 +1,5 @@
 -- Script para crear usuarios de prueba y conexiones
+USE prolink_db;
 -- Ejecutar en phpMyAdmin después de registrar tu primer usuario
 
 -- Primero verifica tu ID de usuario actual

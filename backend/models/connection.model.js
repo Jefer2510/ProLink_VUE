@@ -7,7 +7,7 @@ const sendConnectionRequest = async (senderId, receiverId) => {
   try {
     // Verificar que no exista ya una conexión
     const [existing] = await db.query(
-      'SELECT * FROM connections WHERE (sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)',
+      'SELECT * FROM connections WHERE (user_id = ? AND connected_user_id = ?) OR (user_id = ? AND connected_user_id = ?)',
       [senderId, receiverId, receiverId, senderId]
     );
 
@@ -16,7 +16,7 @@ const sendConnectionRequest = async (senderId, receiverId) => {
     }
 
     const [result] = await db.query(
-      'INSERT INTO connections (sender_id, receiver_id, status, created_at) VALUES (?, ?, "PENDING", NOW())',
+      'INSERT INTO connections (user_id, connected_user_id, status, created_at) VALUES (?, ?, "PENDING", NOW())',
       [senderId, receiverId]
     );
 
@@ -33,7 +33,7 @@ const sendConnectionRequest = async (senderId, receiverId) => {
 const acceptConnection = async (connectionId, userId) => {
   try {
     const [result] = await db.query(
-      'UPDATE connections SET status = "ACCEPTED" WHERE id = ? AND receiver_id = ?',
+      'UPDATE connections SET status = "ACCEPTED" WHERE id = ? AND connected_user_id = ?',
       [connectionId, userId]
     );
 
@@ -50,7 +50,7 @@ const acceptConnection = async (connectionId, userId) => {
 const rejectConnection = async (connectionId, userId) => {
   try {
     const [result] = await db.query(
-      'DELETE FROM connections WHERE id = ? AND (sender_id = ? OR receiver_id = ?)',
+      'DELETE FROM connections WHERE id = ? AND (user_id = ? OR connected_user_id = ?)',
       [connectionId, userId, userId]
     );
 
@@ -71,13 +71,13 @@ const getPendingRequests = async (userId) => {
         c.id as connection_id,
         c.created_at,
         u.id as user_id,
-        u.first_name as nombre,
-        u.last_name as apellido,
+        u.nombre as nombre,
+        u.apellido as apellido,
         u.headline,
         u.profile_picture_url
       FROM connections c
-      INNER JOIN users u ON c.sender_id = u.id
-      WHERE c.receiver_id = ? AND c.status = "PENDING"
+      INNER JOIN users u ON c.user_id = u.id
+      WHERE c.connected_user_id = ? AND c.status = "PENDING"
       ORDER BY c.created_at DESC`,
       [userId]
     );
@@ -98,20 +98,16 @@ const getConnections = async (userId) => {
       `SELECT 
         c.id as connection_id,
         u.id as user_id,
-        u.first_name as nombre,
-        u.last_name as apellido,
+        u.nombre as nombre,
+        u.apellido as apellido,
         u.headline,
         u.email,
-        u.profile_picture_url
+        u.profile_picture_url,
+        c.status
       FROM connections c
-      INNER JOIN users u ON (
-        CASE 
-          WHEN c.sender_id = ? THEN c.receiver_id = u.id
-          ELSE c.sender_id = u.id
-        END
-      )
-      WHERE (c.sender_id = ? OR c.receiver_id = ?) AND c.status = "ACCEPTED"
-      ORDER BY u.first_name, u.last_name`,
+      INNER JOIN users u ON (CASE WHEN c.user_id = ? THEN c.connected_user_id = u.id ELSE c.user_id = u.id END)
+      WHERE (c.user_id = ? OR c.connected_user_id = ?) AND c.status = "ACCEPTED"
+      ORDER BY u.nombre, u.apellido`,
       [userId, userId, userId]
     );
 
@@ -131,20 +127,20 @@ const searchUsers = async (query, currentUserId, limit = 20) => {
     const [users] = await db.query(
       `SELECT 
         u.id,
-        u.first_name as nombre,
-        u.last_name as apellido,
+        u.nombre as nombre,
+        u.apellido as apellido,
         u.headline,
         u.email,
         u.profile_picture_url,
         (SELECT status FROM connections WHERE 
-          (sender_id = ? AND receiver_id = u.id) OR 
-          (receiver_id = ? AND sender_id = u.id)
+          (user_id = ? AND connected_user_id = u.id) OR 
+          (connected_user_id = ? AND user_id = u.id)
         ) as connection_status
       FROM users u
       WHERE u.id != ? 
         AND (
-          u.first_name LIKE ? OR 
-          u.last_name LIKE ? OR 
+          u.nombre LIKE ? OR 
+          u.apellido LIKE ? OR 
           u.headline LIKE ? OR
           u.email LIKE ?
         )

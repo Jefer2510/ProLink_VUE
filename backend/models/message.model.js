@@ -30,8 +30,8 @@ const getConversation = async (userId1, userId2, limit = 50) => {
         m.content,
         m.is_read,
         m.created_at,
-        u.first_name as sender_nombre,
-        u.last_name as sender_apellido
+  u.nombre as sender_nombre,
+  u.apellido as sender_apellido
       FROM messages m
       INNER JOIN users u ON m.sender_id = u.id
       WHERE (m.sender_id = ? AND m.receiver_id = ?) OR (m.sender_id = ? AND m.receiver_id = ?)
@@ -58,8 +58,8 @@ const getConversations = async (userId) => {
           WHEN m.sender_id = ? THEN m.receiver_id
           ELSE m.sender_id
         END as contact_id,
-        u.first_name as nombre,
-        u.last_name as apellido,
+  u.nombre as nombre,
+  u.apellido as apellido,
         u.profile_picture_url,
         (SELECT content FROM messages 
          WHERE (sender_id = ? AND receiver_id = contact_id) OR (sender_id = contact_id AND receiver_id = ?)

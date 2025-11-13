@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS users (
   nombre VARCHAR(100),
   apellido VARCHAR(100),
   headline VARCHAR(255),
+  profile_picture_url VARCHAR(500) DEFAULT NULL,
   points INT DEFAULT 0,
   level INT DEFAULT 1,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

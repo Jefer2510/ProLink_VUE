@@ -47,8 +47,8 @@ const getPostLikes = async (postId) => {
         l.id,
         l.created_at,
         u.id as user_id,
-        u.first_name as nombre,
-        u.last_name as apellido
+  u.nombre as nombre,
+  u.apellido as apellido
       FROM likes l
       INNER JOIN users u ON l.user_id = u.id
       WHERE l.post_id = ?
@@ -92,8 +92,8 @@ const getPostComments = async (postId) => {
         c.parent_comment_id,
         c.created_at,
         u.id as user_id,
-        u.first_name as nombre,
-        u.last_name as apellido,
+  u.nombre as nombre,
+  u.apellido as apellido,
         u.headline
       FROM comments c
       INNER JOIN users u ON c.user_id = u.id
